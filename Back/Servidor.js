@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 dotenv.config();
 const app = express();
 
-// Configuración para obtener __dirname en ES Modules
+// Configuración para __dirname en ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -23,7 +23,7 @@ app.use(
   })
 );
 
-// Endpoints del backend
+// Rutas del backend
 app.use('/api/rutas', rutas);
 app.use('/api/class', rutasClass);
 
@@ -31,16 +31,11 @@ app.get('/api/me', (req, res) => {
   res.json(req.session.user || null);
 });
 
-// Endpoint raíz simple
-app.get('/', (req, res) => {
-  res.send('Backend de Classroom Helper funcionando ✅');
-});
-
-// Servir frontend React
-app.use(express.static(path.join(__dirname, '../Front')));
+// Servir frontend React compilado
+app.use(express.static(path.join(__dirname, '../Front/build')));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../Front/FIndex.html'));
+  res.sendFile(path.join(__dirname, '../Front/build/index.html'));
 });
 
 // Puerto
