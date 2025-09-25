@@ -1,32 +1,33 @@
 import express from 'express';
 import session from 'cookie-session';
 import dotenv from 'dotenv';
-import authRoutes from './routes/auth.js';
-import classroomRoutes from './routes/classroom.js';
 
+// Importamos tus archivos reales
+import rutas from './Rutas.js';
+import rutasClass from './Rutas_Class.js';
 
 dotenv.config();
 const app = express();
 
-
 app.use(express.json());
 app.use(
-session({
-name: 'sess',
-keys: [process.env.SESSION_KEY || 'secret'],
-maxAge: 24 * 60 * 60 * 1000
-})
+  session({
+    name: 'sess',
+    keys: [process.env.SESSION_KEY || 'secret'],
+    maxAge: 24 * 60 * 60 * 1000 // 1 día
+  })
 );
 
+// Montamos tus rutas
+app.use('/api/rutas', rutas);
+app.use('/api/class', rutasClass);
 
-app.use('/auth', authRoutes);
-app.use('/api/classroom', classroomRoutes);
-
-
+// Endpoint para revisar sesión
 app.get('/api/me', (req, res) => {
-res.json(req.session.user || null);
+  res.json(req.session.user || null);
 });
 
-
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
+app.listen(port, () => {
+  console.log(`Servidor corriendo en puerto ${port}`);
+});
