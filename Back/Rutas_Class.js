@@ -1,38 +1,40 @@
 import express from 'express';
-import { createOAuthClient } from '../lib/googleClient.js';
+import { createOAuthClient } from './Libreria_goo.js';
 import { google } from 'googleapis';
-
 
 const router = express.Router();
 
-
-// Middleware: ensure session
+// Middleware: verificar sesión activa
 router.use((req, res, next) => {
-if (!req.session?.user) return res.status(401).json({ error: 'not_authenticated' });
-next();
+  if (!req.session?.user) {
+    return res.status(401).json({ error: 'not_authenticated' });
+  }
+  next();
 });
 
-
-// Example: list courses for the *current* user using refresh_token from DB
+// Listar cursos de Google Classroom para el usuario autenticado
 router.get('/courses', async (req, res) => {
-try {
-// TODO: fetch stored refresh_token for req.session.user.email from DB
-const refreshToken = req.session.refresh_token;
-if (!refreshToken) return res.status(400).json({ error: 'no_refresh_token' });
+  try {
+    // ⚠️ En producción deberías obtener refresh_token desde la BD según el usuario
+    const refreshToken = req.session.refresh_token;
 
+    if (!refreshToken) {
+      return res.status(400).json({ error: 'no_refresh_token' });
+    }
 
-const oauth2Client = createOAuthClient();
-oauth2Client.setCredentials({ refresh_token: refreshToken });
+    // Configurar cliente OAuth con el refresh_token
+    const oauth2Client = createOAuthClient();
+    oauth2Client.setCredentials({ refresh_token: refreshToken });
 
+    // Usar API de Classroom
+    const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
+    const response = await classroom.courses.list({ pageSize: 200 });
 
-const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
-const response = await classroom.courses.list({ pageSize: 200 });
-res.json(response.data.courses || []);
-} catch (err) {
-console.error(err);
-res.status(500).json({ error: 'classroom_error' });
-}
+    res.json(response.data.courses || []);
+  } catch (err) {
+    console.error('Error al listar cursos de Classroom:', err);
+    res.status(500).json({ error: 'classroom_error' });
+  }
 });
-
 
 export default router;
