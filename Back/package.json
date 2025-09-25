@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+   "start": "node Servidor.js",
+  "dev": "nodemon Servidor.js"
   },
   "dependencies": {
     "cookie-session": "^2.0.0",
